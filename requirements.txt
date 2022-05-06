@@ -9,6 +9,8 @@ fonttools==4.32.0
 h5py==3.6.0
 idna==3.3
 jsonschema==4.4.0
+Kivy==2.1.0
+Kivy-examples==2.1.0
 kiwisolver==1.4.2
 krakenex==2.1.0
 matplotlib==3.5.1

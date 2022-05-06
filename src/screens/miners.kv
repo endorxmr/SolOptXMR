@@ -1,0 +1,12 @@
+:import json
+
+:def json_ui_loader(filename):
+:    return json.load(open(f"ui-menus/{filename}.json", "r"))
+
+<Miner_Widget>:
+    id: None
+    text: None
+
+Miner_Layout:
+    id: miner_screen
+    cols: 3

@@ -2,12 +2,24 @@
     "miners": [
       {
         "name": "EPYC",
+        "hashrate": 20000,
         "watt_max": 200.00,
+        "watt_cur":  190.00,
         "watt_idle": 50.00,
         "watt_sleep": 2.00
       },
       {
+        "name": "Laptop",
+        "hashrate": 1600,
+        "watt_cur":  40.00,
+        "watt_max":  45.00,
+        "watt_idle": 10.00,
+        "watt_sleep": 1.00
+      },
+      {
         "name": "MiniPC",
+        "hashrate": 1000,
+        "watt_cur":  26.00,
         "watt_max":  30.00,
         "watt_idle": 10.00,
         "watt_sleep": 0.50

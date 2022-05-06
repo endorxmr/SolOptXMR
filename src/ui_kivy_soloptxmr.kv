@@ -1,0 +1,22 @@
+<MainMenu_Button>:
+    # background_color: [0,0,0,0]
+    id: None
+    text: None
+    on_release: app.go_screen(self.text)
+
+
+BoxLayout:
+    orientation: 'horizontal'
+    MainMenuLeft_Layout:
+        id: left_menu
+        orientation: 'vertical'
+        size_hint: (0.6, 1)
+    # Miner_Layout:
+    ScreenManager:
+        id: right_screen
+        on_current_screen:
+            # if right_screen.current != args[1]:\
+            # idx = app.screen_names.index(args[1]);\
+            # app.go_screen(idx)
+            idx = app.screen_names.index(args[1].name)
+            if idx > -1: app.hierarchy.append(idx)
