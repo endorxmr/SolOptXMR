@@ -36,6 +36,7 @@ PowerUsageSimulation::SimResult PowerUsageSimulation::Simulate(int i, int currHo
             res.sumHashes += hashe * hours * 3600; // [H] = [H/s] * 3600 [s/h]
         }
         res.sumPowerUsage += comp.GetUsage(val);
+        res.sumPowerUsageMining += comp.GetUsage(val);
     }
     if (isInitialLoad)
     {

@@ -17,11 +17,13 @@ public:
     {
         double sumHashes = 0;
         double sumPowerUsage = 0;
+        double sumPowerUsageMining = 0;
 
         void Add(const SimResult & other)
         {
             sumHashes += other.sumHashes;
             sumPowerUsage += other.sumPowerUsage;
+            sumPowerUsageMining += other.sumPowerUsageMining;
         }
     };
 

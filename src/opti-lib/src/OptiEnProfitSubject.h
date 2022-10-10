@@ -33,7 +33,7 @@ public:
 
     //STDFWD::vector<OptiVarF> GetOptiVarsResult() override { return m_optiFloatResult; }
     void UpdateOutput();
-    EnjoLib::VecD m_hashes, m_loads, m_penalityUnder, m_input, m_prod, m_hashrateBonus, m_usages;
+    EnjoLib::VecD m_hashes, m_loads, m_penalityUnder, m_input, m_prod, m_hashrateBonus, m_usages, m_energy_used_mining;
 
     double HashrateBonus(int hour) const;
     double HashrateBonusNonCached(int hour) const;

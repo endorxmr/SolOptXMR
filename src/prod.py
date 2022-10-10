@@ -179,6 +179,8 @@ class BatterySimulatorCpp(generator.BatterySimulator):
         self.hashrates  = np.loadtxt(basePathIn.format('hashrates'))
         self.loads      = np.loadtxt(basePathIn.format('battery'))
         self.usage      = np.loadtxt(basePathIn.format('usage'))
+        self.usage_watts         = np.loadtxt(basePathIn.format('usage-watts'))
+        self.mining_energy_usage = np.loadtxt(basePathIn.format('mining-energy-usage'))
 
         os.chdir(cwd)
 
@@ -189,14 +191,16 @@ class BatterySimulatorCpp(generator.BatterySimulator):
 def get_usage_prod(args, available, battery_charge, horizon):
     bat_sim = BatterySimulatorCpp()
     bat_sim.run(args, battery_charge, horizon)
-    hashrates = bat_sim.hashrates
-    loads = bat_sim.loads
-    usage = bat_sim.usage
-    incomes = [0]* len(available)
-    costs = [0]* len(available)
-    effs = [0]* len(available)
+    hashrates = bat_sim.hashrates  # H/s
+    loads = bat_sim.loads  # Ah
+    usage = bat_sim.usage  # A
+    usage_watts = bat_sim.usage_watts  # W
+    mining_energy_usage = bat_sim.mining_energy_usage  # Wh
+    incomes = [0] * len(available)  # $
+    costs = mining_energy_usage * args.electricity_price / 1000 if args.electricity_price is not None else [0] * len(available)  # [$] = [$/kWh] * [Wh] / 1000 [W/kW]
+    effs = hashrates / mining_energy_usage #if mining_energy_usage is not None  # H/J
     
-    return "Production", hashrates, usage, loads, bat_sim, incomes, costs, effs
+    return "Production", hashrates, usage, usage_watts, loads, bat_sim, incomes, mining_energy_usage, costs, effs
 
 def plot_single(ax, data, days):
     length = 24*days

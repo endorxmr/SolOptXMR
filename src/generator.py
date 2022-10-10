@@ -128,22 +128,24 @@ def get_power(start_date, days_horizon=3, unpickle=True):
 
     
 
-def plot_sun(name, elev, bat, usage, show_plots):
+def plot_sun(name, elev, bat, usage, usage_watts, show_plots):
     #print(elev)
     plt.gca().xaxis_date(sunrise_lib.tz)
     plt.title("Algo: " + name)
     plt.xlabel("Time")
     plt.xticks(rotation=25, ha='right')
     plt.ylabel("Power [W] [Wh] & capacity [Ah]")
-    plt.plot(list_to_pd([MAX_CAPACITY_THEORETICAL]   * len(elev), elev))
-    plt.plot(list_to_pd([MAX_CAPACITY]   * len(elev), elev))
-    plt.plot(bat,   'g')
-    plt.plot(list_to_pd([MIN_CAPACITY]   * len(elev), elev))
+    plt.plot(list_to_pd([MAX_CAPACITY_THEORETICAL]   * len(elev), elev))  # [Ah] max bat charge theo
+    plt.plot(list_to_pd([MAX_CAPACITY]   * len(elev), elev))  # [Ah] max bat charge real
+    plt.plot(bat,   'g')  # (usage, available) == (bat_sim.loads, available)
+    plt.plot(list_to_pd([MIN_CAPACITY]   * len(elev), elev))  # [Ah] battery['min_load_amph'] * battery['count']
     plt.plot(elev,  'y')
-    plt.plot(list_to_pd([MAX_USAGE]      * len(elev), elev), 'r')
-    plt.plot(usage, 'b')
+    plt.plot(list_to_pd([MAX_USAGE]      * len(elev), elev), 'r')  # [A]
+    plt.plot(usage, 'b')  # [A]
+    # plt.plot(list_to_pd([MAX_POWER_USAGE]      * len(elev), elev), 'r')  # [A]
+    plt.plot(usage_watts)  # [W]
     plt.grid()
-    plt.legend(['max bat charge theo', 'max bat charge real', 'bat charge', 'min bat charge', 'sun input', 'max power usage', 'power usage'])
+    plt.legend(['max bat charge theo [Ah]', 'max bat charge real [Ah]', 'bat charge', 'min bat charge [Ah]', 'sun input', 'max current [A]', 'current usage [A]', 'power usage [W]'])
     os.makedirs(BUILD_DIR, exist_ok=True)
     fout_rel_path = "{}/fig-{}.png".format(BUILD_DIR, name)
     print("Saving figure to:",fout_rel_path)
@@ -313,14 +315,14 @@ def print_profits(incomes, costs):
     print(f"Profitability = {profitability:.2f} %")
 
 def get_usage(args, available, algo, battery_charge=0, horizon=0):
-    name, hashrates, usage, bat, bat_sim, incomes, costs, effs  = algo(args, available, battery_charge, horizon)
+    name, hashrates, usage, usage_watts, bat, bat_sim, incomes, mining_energy_usage, costs, effs = algo(args, available, battery_charge, horizon)
     print("\nAlgo name: ", name)
     bat_sim.print_stats(len(available))
     print_hashes(hashrates)
     print_profits(incomes, costs)
     #print(effs)  # Check if efficiency is reasonable
     # return name, list_to_pd(usage, available), list_to_pd(incomes, available), list_to_pd(costs, available), list_to_pd(bat, available)
-    return name, list_to_pd(usage, available), list_to_pd(bat, available) 
+    return name, list_to_pd(usage, available), list_to_pd(bat, available), list_to_pd(usage_watts, available)
 
 
 def list_to_pd(listt, df):
@@ -409,8 +411,8 @@ def run_main(args, elev, show_plots, battery_charge=0, horizon=0):
     run_algo(args, elev, show_plots, get_usage_endor_example, battery_charge, horizon)
 
 def run_algo(args, elev, show_plots, algo, battery_charge, horizon):
-    name, usage, bat = get_usage(args, elev, algo, battery_charge, horizon)
-    plot_sun(name, elev, bat, usage, show_plots)
+    name, usage, bat, usage_watts = get_usage(args, elev, algo, battery_charge, horizon)
+    plot_sun(name, elev, bat, usage, usage_watts, show_plots)
 
 
 def test(show_plots=False):

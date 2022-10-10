@@ -129,7 +129,7 @@ Solution OptiSubjectEnProfit::GetVerbose(const EnjoLib::Matrix & dataMat, bool v
 
                 PowerUsageSimulation::SimResult resVisual{};
                 BatterySimulation batteryCopy(conf, m_dataModel.GetBatPars(), m_dataModel.GetSystem());
-                VecD hashes, loads, penalityUnder, input, prod, hashrateBonus, usages;
+                VecD hashes, loads, penalityUnder, input, prod, hashrateBonus, usages, usages_watts, energy_used_mining;
                 //Assertions::SizesEqual(m_dataModel.GetComputers().size(), dataMat.size(), "OptiSubjectEnProfit::GetVerbose");
                 for (int i = 0; i < n; ++i)
                 {
@@ -141,22 +141,32 @@ Solution OptiSubjectEnProfit::GetVerbose(const EnjoLib::Matrix & dataMat, bool v
                     const PowerUsageSimulation::SimResult & resLocal = powSim.Simulate(i, m_currHour, dataMat, bonusMul, batteryCopy.initial_load);
                     resVisual.Add(resLocal);
                     const double load = batteryCopy.iter_get_load(powerProd, resLocal.sumPowerUsage);
-                    usages.Add(resLocal.sumPowerUsage * batteryCopy.pars.GetMulPowerToCapacity(m_dataModel.GetSystem().voltage));
+                    // const double load_mining = batteryCopy.iter_get_load(powerProd, resLocal.sumPowerUsageMining);
+                    usages.Add(resLocal.sumPowerUsage * batteryCopy.pars.GetMulPowerToCapacity(m_dataModel.GetSystem().voltage)); // [A] = [W] * [1/V]
+                    usages_watts.Add(resLocal.sumPowerUsage); // [W]
+                    // usages_mining.Add(resLocal.sumPowerUsageMining * batteryCopy.pars.GetMulPowerToCapacity(m_dataModel.GetSystem().voltage));
                     //input.Add(val);
-                    loads.Add(load);
+                    loads.Add(load); // [Ah]
+                    // loads_mining.Add(load_mining);
+                    energy_used_mining.Add(resLocal.sumPowerUsageMining); // [Wh] = [W] * 1 [h] - Right now it's 1h by default because there's no time horizon setting!
                     prod.Add(powerProd);
                     hashes.Add(resVisual.sumHashes);
                     hashrateBonus.Add(bonusMul);
                 }
                 m_usages = usages;
+                // m_usages_mining = usages_mining;
                 m_input = input;
                 m_loads = loads;
+                // m_loads_mining = loads_mining;
+                m_energy_used_mining = energy_used_mining;
                 m_prod = prod;
                 m_hashes = hashes;
                 m_hashrateBonus = hashrateBonus;
                 //ToolsMixed().SystemCallWarn("clear", __PRETTY_FUNCTION__);
                 OutputVar(hashes, "hashrates");
                 OutputVar(usages, "usage", false);
+                OutputVar(usages_watts, "usage-watts", false);
+                OutputVar(energy_used_mining, "mining-energy-usage", false);
                 if (not m_dataModel.GetConf().NO_GNUPLOT)
                 {
                     //GnuplotPlotTerminal1d(input, "input", 1, 0.5);
