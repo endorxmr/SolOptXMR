@@ -78,6 +78,8 @@ class POW_Coin:
             "efficiency": hashrate / power_consumption if power_consumption != 0 else math.inf,
             "mining_cost_s": power_consumption * electricity_cost / 1000 / 3600,  # W * fiat/(kW*h) / 1000 W/kW / 3600 s/h = fiat/s
         }
+        if difficulty < 1:
+            raise ValueError("Difficulty must be greater than 0!")
         data["expected_crypto_income_s"] = data["reward"] * hashrate / data["difficulty"] * (1 - pool_fee)
         data["emission_rate_s"] = data["price"] * data["reward"] / self.blocktime
         data["expected_fiat_income_s"] = data["price"] * data["expected_crypto_income_s"]
