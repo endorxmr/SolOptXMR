@@ -110,7 +110,7 @@ class POW_Coin:
             self._height_last_fetched = now
             self._difficulty = data["result"]["difficulty"]
             self._difficulty_last_fetched = now
-        return data["result"]
+            return data["result"]
     
     def _request_headers_range(self, start_height:int, end_height:int) -> pd.DataFrame:
         json_req = {
