@@ -66,6 +66,15 @@ class POW_Coin:
             self._reward_last_fetched = now
         return self._reward
     
+    def normalized_ameu(self, block_reward : float = None, xmr_price : float = None, difficulty : float = None, pool_fee : float = 0.0) -> float:
+        block_reward = block_reward if block_reward else self.reward
+        xmr_price = xmr_price if xmr_price else self.price
+        difficulty = difficulty if difficulty else self.difficulty
+        if difficulty < 1:
+            raise ValueError("Difficulty must be greater than 0!")
+        normalized_ameu = (1000 * 3600) * block_reward * (1 - pool_fee) * xmr_price / difficulty
+        return normalized_ameu
+    
     def profitability(self, fiat: fiat, hashrate: int, power_consumption: int, electricity_cost: float, pool_fee:float=0, price:float=None, reward:float=None, difficulty:int=None):
         if pool_fee < 0 or pool_fee > 1:
             raise ValueError("Invalid pool fee!")
