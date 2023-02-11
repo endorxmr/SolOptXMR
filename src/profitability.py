@@ -23,7 +23,8 @@ class POW_Coin:
         # TODO: implement daemon RPC calls using monero-python (pip install monero)
         now = datetime.now()
         self.coin = coin
-        self.node_url = dict_config["profitability"][coin.name]["node"]
+        self.node_urls = dict_config["profitability"][coin.name]["nodes"]
+        self.node_fails = 0
         self.blocktime = dict_config["profitability"][coin.name]["blocktime"]
         self._height = None
         self._height_last_fetched = now
@@ -61,7 +62,7 @@ class POW_Coin:
         now = datetime.now()
         if self._reward is None or now - self._reward_last_fetched > timedelta(minutes=config.profitability.refresh_delta_mins):
             req_data = {"jsonrpc": "2.0", "id": "0", "method": "get_last_block_header"}
-            data = requests.post(f"{self.node_url}/json_rpc", json=req_data).json()
+            data = self._node_request_jsonrpc(req=req_data)
             self._reward = int(data["result"]["block_header"]["reward"]) / 1e12
             self._reward_last_fetched = now
         return self._reward
@@ -97,11 +98,28 @@ class POW_Coin:
         data["breakeven_efficiency"] = (data["difficulty"] * electricity_cost) / (data["price"] * data["reward"] * 1000 * 3600 * (1 - pool_fee))
         return data
     
+    def _node_request_jsonrpc(self, req:dict) -> dict:
+        nodes_num = len(self.node_urls)
+        # Try nodes in sequence, starting from the last node that
+        for i in range(nodes_num):
+            node_url = self.node_urls[self.node_fails % nodes_num]
+            try:
+                data = requests.post(f"{node_url}/json_rpc", json=req, timeout=5).json()
+            except Exception as e:
+                self.node_fails = (self.node_fails + 1) % nodes_num
+                print(f"Error while trying to request {req['method']} from {node_url}/json_rpc: ", e)
+                pass
+            else:
+                return data
+        # print(f"All nodes in {self.node_urls} failed to respond while trying to request {req['method']}!")
+        # return None
+        raise Exception(f"All nodes in {self.node_urls} failed to respond while trying to request {req['method']}!")
+    
     def get_info(self) -> dict:
         now = datetime.now()
-        json_req = { "jsonrpc": "2.0", "id": "0", "method": "get_info"}
+        json_req = {"jsonrpc": "2.0", "id": "0", "method": "get_info"}
         try:
-            data = requests.get(f"{self.node_url}/json_rpc", json=json_req).json()
+            data = self._node_request_jsonrpc(req=json_req)
         except Exception as e:
             print("Error!", e)
             pass
@@ -120,17 +138,17 @@ class POW_Coin:
             "params": {"start_height": start_height, "end_height": end_height}
         }
         try:
-            data = requests.post(f"{self.node_url}/json_rpc", json=json_req).json()
+            data = self._node_request_jsonrpc(req=json_req)
             if "result" in data:
                 result = pd.DataFrame(data["result"]["headers"], columns=["height", "timestamp", "difficulty", "reward"])
                 result.set_index("height", inplace=True)
                 return result
             elif "error" in data:
-                raise Exception(f"Error while attempting to fetch headers {start_height}-{end_height} from {self.node_url}\n{data['error']}")
+                raise Exception(f"Error while attempting to fetch headers {start_height}-{end_height} from {self.node_urls[self.node_fails % len(self.node_urls)]}\n{data['error']}")
             else:
-                raise Exception(f"Something went terribly wrong while attempting to fetch headers {start_height}-{end_height} from {self.node_url}\n{data}")
+                raise Exception(f"Something went terribly wrong while attempting to fetch headers {start_height}-{end_height} from {self.node_urls[self.node_fails % len(self.node_urls)]}\n{data}")
         except Exception as e:
-            print(f"Error while attempting to fetch headers {start_height}-{end_height} from {self.node_url}")
+            print(f"Error while attempting to fetch headers {start_height}-{end_height} from {self.node_urls[self.node_fails % len(self.node_urls)]}")
             print(e)
     
     def _request_headers_batcher(self, start_height:int, end_height:int, batch_size:int=1000) -> Tuple[pd.DataFrame, bool]:
