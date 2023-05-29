@@ -23,7 +23,7 @@
         "refresh_delta_mins": 15,
         "XMR": {
             "blocktime": 120,
-            "nodes": ["http://node.supportxmr.com:18081", "http://xmr-node.cakewallet.com:18081"]
+            "nodes": ["http://xmr-node.cakewallet.com:18081", "http://node.supportxmr.com:18081"]
         }
     }
 }
