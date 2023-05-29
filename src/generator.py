@@ -236,7 +236,7 @@ class BatterySimulator:
 def get_usage_endor_example(available, battery_charge, horizon):
     # TODO: use the available power wisely
     usage = []
-    hashrates = []
+    hashes = []
     loads = []
     incomes = []
     costs = []
@@ -268,14 +268,14 @@ def get_usage_endor_example(available, battery_charge, horizon):
         load_i = bat_sim.iter_get_load(avail, use)
         loads.append(load_i)
 
-        hashrates.append(hashrate)
+        hashes.append(hashrate)
         usage.append(use)
 
-    return "Endor", hashrates, usage, loads, bat_sim, incomes, costs, effs
+    return "Endor", hashes, usage, loads, bat_sim, incomes, costs, effs
 
 def get_usage_simple(available, battery_charge, horizon):
     usage_exp = [MAX_USAGE] * len(available)
-    hashrates = [usage_exp[0] * 0.5] * len(available)
+    hashes = [usage_exp[0] * 0.5] * len(available)
     loads = []
     usage = []
     incomes = [0]* len(available)
@@ -291,15 +291,17 @@ def get_usage_simple(available, battery_charge, horizon):
         load_i = bat_sim.iter_get_load(available[i], use)
         loads.append(load_i)
 
-    return "Simple", hashrates, usage, loads, bat_sim, incomes, costs, effs
+    return "Simple", hashes, usage, loads, bat_sim, incomes, costs, effs
 
-def print_hashes(hashrates):
+def print_hashes(hashes):
     HASH_UNIT = 1e6
-    print("Total hashes =", round(np.sum(hashrates) / HASH_UNIT, 2), "MH")
+    # print("Total hashes =", round(np.sum(hashes) / HASH_UNIT, 2), "MH")
+    print("Total hashes =", round(hashes[-1] / HASH_UNIT, 2), "MH")
 
 def print_profits(incomes, costs):
-    income = round(np.nansum(incomes), 2)
-    cost = round(np.nansum(costs), 2)
+    # income = round(np.nansum(incomes), 2)
+    income = incomes[-1]  # Only the last element, because it's cumulative
+    cost = np.nansum(costs)
     profit = income - cost
     if profit > 0:
         profitability = 100 * profit / cost if cost != 0 else np.PINF
@@ -315,10 +317,10 @@ def print_profits(incomes, costs):
     print(f"Profitability = {profitability:.2f} %")
 
 def get_usage(args, available, algo, battery_charge=0, horizon=0):
-    name, hashrates, usage, usage_watts, bat, bat_sim, incomes, mining_energy_usage, costs, effs = algo(args, available, battery_charge, horizon)
+    name, hashes, usage, usage_watts, bat, bat_sim, incomes, mining_energy_usage, costs, effs = algo(args, available, battery_charge, horizon)
     print("\nAlgo name: ", name)
     bat_sim.print_stats(len(available))
-    print_hashes(hashrates)
+    print_hashes(hashes)
     print_profits(incomes, costs)
     #print(effs)  # Check if efficiency is reasonable
     # return name, list_to_pd(usage, available), list_to_pd(incomes, available), list_to_pd(costs, available), list_to_pd(bat, available)

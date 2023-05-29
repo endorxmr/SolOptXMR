@@ -176,7 +176,7 @@ class BatterySimulatorCpp(generator.BatterySimulator):
         
         basePathIn = sunrise_lib.DIR_TMP + "/soloptout-{}.txt"
 
-        self.hashrates  = np.loadtxt(basePathIn.format('hashrates'))
+        self.hashes     = np.loadtxt(basePathIn.format('hashrates'))
         self.loads      = np.loadtxt(basePathIn.format('battery'))
         self.usage      = np.loadtxt(basePathIn.format('usage'))
         self.usage_watts         = np.loadtxt(basePathIn.format('usage-watts'))
@@ -185,13 +185,13 @@ class BatterySimulatorCpp(generator.BatterySimulator):
         os.chdir(cwd)
 
         #if hashrate_bonus != 0:
-        #    plot_hashrates()
-            
+        #    plot_hashes()
+
 
 def get_usage_prod(args, available, battery_charge, horizon):
     bat_sim = BatterySimulatorCpp()
     bat_sim.run(args, battery_charge, horizon)
-    hashrates = bat_sim.hashrates  # H/s
+    hashes = bat_sim.hashes  # H, cumulative
     loads = bat_sim.loads  # Ah
     usage = bat_sim.usage  # A
     usage_watts = bat_sim.usage_watts  # W
@@ -210,7 +210,7 @@ def plot_single(ax, data, days):
         ax.axvline(x=d * 24, color='g')
     ax.grid()
 
-def plot_hashrates():
+def plot_hashes():
     fig, (ax1, ax2) = plt.subplots(2, 1)
     #plt.gca().xaxis_date(sunrise_lib.tz) # Not a time series just yet
 
@@ -237,7 +237,7 @@ def run_main(args, elev, show_plots, battery_charge, horizon):
     generator.run_algo(args, elev, show_plots, get_usage_prod, battery_charge, horizon)
     #generator.run_algo(args, elev, show_plots, generator.get_usage_simple)
     if not args.sim and not args.no_plot:
-        plot_hashrates()
+        plot_hashes()
 
 def main(args):
     if args.battery_charge_ocr:
@@ -271,7 +271,7 @@ def main(args):
         install_path = getInstallPath(args.binaries_dir)
         os.chdir(install_path)
         hashrate_bonus = get_hashrate_bonus(args.out_dir)
-        plot_hashrates()
+        plot_hashes()
     else:
         global MAX_RAW_SUN_INPUT_INFO
         start_date = dateutil.parser.parse(args.start_date)
