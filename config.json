@@ -15,6 +15,7 @@
         "T_DELTA_HOURS": 1,
         "PATH_POSITIONS": "/solar_pos",
         "ELECTRICITY_PRICE": 0.1,
+        "ELECTRICITY_RESALE_PRICE": 0.02,
         "POOL_FEE": 0,
         "TARGET_PRICE": 300
     },
