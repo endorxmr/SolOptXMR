@@ -140,7 +140,8 @@ class BatterySimulatorCpp(generator.BatterySimulator):
         if args.offline_force:
             hashrate_bonus = 0
         else:
-            hashrate_bonus = get_hashrate_bonus(args.out_dir)
+            # hashrate_bonus = get_hashrate_bonus(args.out_dir)
+            hashrate_bonus = 0
 
         #hashrate_bonus = -3.2 # For simulation only
         #hashrate_bonus =  5.2 # For simulation only
