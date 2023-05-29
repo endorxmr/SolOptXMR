@@ -23,26 +23,26 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
         # Volatile cache
     - name: ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ccache
         key:          ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-${{ github.sha }}
         restore-keys: ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-
     # Less volatile cache
     - name: data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: externals/tsqsim/build/data/data/txt
         key:          data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
         restore-keys: data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
     # Expendable, volatile & large cache
     - name: diff cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /tmp/diff_XMR.pkl
         key: data-diff-01-${{ github.sha }}
@@ -50,7 +50,7 @@ jobs:
           data-diff-01-${{ github.sha }}
           data-diff-01
 #    - name: deps cache
-#      uses: actions/cache@v2
+#      uses: actions/cache@v3
 #      with:
 #        path: build/deps/dload
 #        key:          deps-${{ hashFiles('build/deps/dload/*') }}
@@ -80,26 +80,26 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
         # Volatile cache
     - name: ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ccache
         key:          ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-${{ github.sha }}
         restore-keys: ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-
     # Less volatile cache
     - name: data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: externals/tsqsim/build/data/data/txt
         key:          data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
         restore-keys: data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
     # Expendable, volatile & large cache
     - name: diff cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /tmp/diff_XMR.pkl
         key: data-diff-01-${{ github.sha }}
@@ -107,7 +107,7 @@ jobs:
           data-diff-01-${{ github.sha }}
           data-diff-01
 #    - name: deps cache
-#      uses: actions/cache@v2
+#      uses: actions/cache@v3
 #      with:
 #        path: build/deps/dload
 #        key:          deps-${{ hashFiles('build/deps/dload/*') }}
@@ -137,26 +137,26 @@ jobs:
     env:
       CCACHE_TEMPDIR: /tmp/.ccache-temp
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     # Volatile cache
     - name: ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /Users/runner/Library/Caches/ccache
         key:          ccache03-${{ runner.os }}-${{ matrix.os }}-build-${{ github.sha }}
         restore-keys: ccache03-${{ runner.os }}-${{ matrix.os }}-build-
     # Less volatile cache
     - name: data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: build/data/data/txt
         key:          data-${{ hashFiles('build/data/data/txt/**/*') }}
         restore-keys: data-${{ hashFiles('build/data/data/txt/**/*') }}
     # Expendable, volatile & large cache
     - name: diff cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /tmp/diff_XMR.pkl
         key: data-diff-01-${{ github.sha }}
@@ -181,26 +181,26 @@ jobs:
     env:
       CCACHE_TEMPDIR: /tmp/.ccache-temp
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     # Volatile cache
     - name: ccache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /Users/runner/Library/Caches/ccache
         key:          ccache03-${{ runner.os }}-${{ matrix.os }}-build-${{ github.sha }}
         restore-keys: ccache03-${{ runner.os }}-${{ matrix.os }}-build-
     # Less volatile cache
     - name: data cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: build/data/data/txt
         key:          data-${{ hashFiles('build/data/data/txt/**/*') }}
         restore-keys: data-${{ hashFiles('build/data/data/txt/**/*') }}
     # Expendable, volatile & large cache
     - name: diff cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /tmp/diff_XMR.pkl
         key: data-diff-01-${{ github.sha }}
