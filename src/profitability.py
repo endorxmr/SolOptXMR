@@ -96,6 +96,7 @@ class POW_Coin:
         data["expected_fiat_income_kwh"] = data["efficiency"] * data["reward"] * data["price"] * (1 - pool_fee) * 1000 * 3600 / data["difficulty"]
         data["profitability"] = 100 * (data["expected_fiat_income_s"] - data["mining_cost_s"]) / data["mining_cost_s"] if data["mining_cost_s"] != 0 else math.inf
         data["breakeven_efficiency"] = (data["difficulty"] * electricity_cost) / (data["price"] * data["reward"] * 1000 * 3600 * (1 - pool_fee))
+        data["hash_value"] = data["price"] * data["reward"] / data["difficulty"]  # $/H, value of a single hash
         return data
     
     def _node_request_jsonrpc(self, req:dict) -> dict:
