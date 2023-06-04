@@ -17,7 +17,7 @@ public:
 	double wattIdle = 5;
 	double wattAsleep = 1;
 	double hashPerCore = 250;
-	double maxTempCelcius = 50;
+	double maxTempCelsius = 50;
 	double scalingFactor = 0.85;
 	int minRunHours = 2;
 

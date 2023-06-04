@@ -139,7 +139,7 @@ EnjoLib::Array<Computer> JsonReader::ReadComputers(bool verbose) const
         compObj.hashPerCore =    jwrap.GetValueJson("hash_per_core").GetDouble();
         compObj.wattAsleep =     jwrap.GetValueJson("watt_asleep").GetDouble();
         compObj.wattIdle =       jwrap.GetValueJson("watt_idle").GetDouble();
-        compObj.maxTempCelcius = jwrap.GetValueJson("max_temp_celcius").GetDouble();
+        compObj.maxTempCelsius = jwrap.GetValueJson("max_temp_celsius").GetDouble();
         compObj.minRunHours =    jwrap.GetValueJson("min_run_hours").GetInt();
         compObj.name =           jwrap.GetValueJson("name").GetString();
         compObj.hostname =       jwrap.GetValueJson("hostname").GetString();

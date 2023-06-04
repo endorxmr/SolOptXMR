@@ -3,7 +3,7 @@
 	"generate" : true,
 	"buy" : false,
 	"sell" : false,
-	"max_temp_celcius" : 70,
-	"cooled_temp_celcius" : 45
+	"max_temp_celsius" : 70,
+	"cooled_temp_celsius" : 45
 }
 
