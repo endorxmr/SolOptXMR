@@ -7,12 +7,12 @@ import sunrise_lib
 from ortools.algorithms import pywrapknapsack_solver
 
 
-def solver(devices:list[dict], timeframe:int, power_limit:int, energy_limit:int|float) -> list[dict]:
+def solver(devices:dict, timeframe:int, power_limit:int, energy_limit:int|float) -> dict:
     """
     Calculate the mining solution for a given timeframe, power limit, and energy limit.
 
     Args:
-        devices (list(dict)): List of mining devices available.
+        devices (dict): Unzipped dict of mining devices available.
         timeframe (int): Duration of the timeframe in minutes. [min]
         power_limit (int): Maximum power available for mining in Watts. [W]
         energy_limit (int|float): Energy available for mining in this timeframe in kilowatt-hours. [kWh]
@@ -27,12 +27,16 @@ def solver(devices:list[dict], timeframe:int, power_limit:int, energy_limit:int|
     """
 
     # Type checking
-    if not isinstance(timeframe, int) or not isinstance(power_limit, int) or not isinstance(energy_limit, int|float):
-        raise TypeError("The 'timeframe' and 'power_limit' arguments must be of type 'int', and the 'energy_limit' argument must be of type 'int' or 'float'.")
-    if not isinstance(devices, list):
-        raise TypeError("'devices' must be a list of dicts")
+    if not isinstance(timeframe, int):
+        raise TypeError("The 'timeframe' argument must be of type 'int'.")
+    if not isinstance(power_limit, int):
+        raise TypeError("The 'power_limit' argument must be of type 'int'.")
+    if not isinstance(energy_limit, int|float):
+        raise TypeError("The 'energy_limit' argument must be of type 'int' or 'float'.")
+    if not isinstance(devices, dict):
+        raise TypeError("'devices' must be a dict")
 
-    # Negative value checking
+    # Value checking
     if timeframe < 0 or power_limit < 0 or energy_limit < 0:
         raise ValueError("Input arguments cannot have negative values.")
     if len(devices) == 0:  # Empty list of devices, skipping computation and returning the same empty list
@@ -56,21 +60,25 @@ def solver(devices:list[dict], timeframe:int, power_limit:int, energy_limit:int|
     # we would be mining at a loss no matter what).
     # Note: this needs a few specifiers:
     # - if we're disconnected from the grid, then any extra energy beyond what we can store (and beyond what the
-    #   user sets as minimum charge level) would be wasted, so it's always profitable to mine
+    #   user sets as minimum charge level) would be wasted, so it's always profitable to mine - NOTE: this would
+    #   already be reflected in the breakeven profitability being 0; this also applies if we're overcharging the
+    #   batteries
     # - if we're connected to the grid and we sell back, then we also need to beat the energy buyback price, and
     #   not just basic profitability
 
+    # TODO: don't forget about the difficulty prediction from tsqsim, which affects future profitability calculations!
+
     # TODO: add energy usage weights and capacity. Which could just be power usage * time frame duration.
-    # We need both because the power limit is a limitation of the power delivery system (and fixed),
-    # while the energy limit will change for each time frame (and will come as a function parameter).
+    # We need both because the power limit is a limitation of the power delivery system (not fixed, depends on
+    # system load), while the energy limit will change for each time frame (and will come as a function parameter).
     # ACTUALLY, the power available might also change for each timeframe, because we have to take into account
     # any other external consumers!
 
     # hashrates = [1000, 1000, 2920, 2920, 2920, 680*12, 680*12, 680*12, 680*12, 680*12]  # H
     # powers = [46, 46, 7.3*4, 7.3*4, 7.3*4, 73.8, 73.8, 73.8, 73.8, 73.8]  # W
-    device_indices = [j for j in range(len(devices)) for i in range(devices[j]["count"])]
-    hashrates = [device["hash_per_core"] * device["cores"] for device in devices for _ in range(device["count"])]
-    powers = [device["watt_per_core"] * device["cores"] for device in devices for _ in range(device["count"])]
+    device_indices = devices["device_indices"]
+    hashrates = devices["hashrates"]
+    powers = devices["powers"]
     energy_const = timeframe / 60 / 1000  # [min] / 60 [min/h] / 1000 [W/kW]
     energies = [p * energy_const for p in powers]  # kWh
     # energies = powers  # W!!
@@ -110,14 +118,40 @@ def solver(devices:list[dict], timeframe:int, power_limit:int, energy_limit:int|
     print('Packed items:', packed_items)
     print('Packed_weights:', packed_weights[0], packed_weights[1])
 
-    chosen_devices = [device_indices[x] for x in packed_items]
-    for i in range(len(devices)):
-        devices[i]['count'] = chosen_devices.count(i)
+    solution = {
+        "chosen_indices": packed_items,
+        "hashrate": computed_value,
+        "power": total_weight[0],
+        "energy": total_weight[1]
+    }
+    return solution
+
+
+def setup_devices(devices:list[dict]) -> dict:
+    if not isinstance(devices, list):
+        raise TypeError("'devices' must be a list of dicts")
+    if len(devices) == 0:  # Empty list of devices, returning the same empty list
+        return devices
+
+    device_indices = [j for j in range(len(devices)) for i in range(devices[j]["count"])]
+    hashrates = [device["hash_per_core"] * device["cores"] for device in devices for _ in range(device["count"])]
+    powers = [device["watt_per_core"] * device["cores"] for device in devices for _ in range(device["count"])]
+
+    # devices = list(zip(device_indices, hashrates, powers, energies))  # List of tuples
+    # keys = ["index", "hashrate", "power", "energy"]
+    # devices = [{keys[i]: tup[i] for i in range(len(keys))} for tup in devices]  # List of dicts
+    # devices = [device_indices, hashrates, powers, energies]  # List of unzipped lists
+    # devices = {"device_indices": device_indices, "hashrates": hashrates, "powers": powers, "energies": energies}  # Dict of unzipped lists
+    devices = {"device_indices": device_indices, "hashrates": hashrates, "powers": powers}  # Dict of unzipped lists
     return devices
 
 
 if __name__ == '__main__':
     # Read the computers configuration
     computers = list(sunrise_lib.config_computers.get('computers'))
+    devices = setup_devices(computers)
+    timeframe = 5  # [min]
+    power = 250  # [W]
+    energy = 1  # [kWh]
 
-    print(solver(computers, 5, 250, 1))
+    print(solver(devices, timeframe, power, energy))
