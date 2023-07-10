@@ -24,6 +24,7 @@ import voltage_lib
 import ocr_gas
 import generator
 import kraken
+import knapsack
 from profitability import POW_Coin
 
 from python_json_config import ConfigBuilder
@@ -190,19 +191,33 @@ class BatterySimulatorCpp(generator.BatterySimulator):
 
 
 def get_usage_prod(args, available, battery_charge, horizon):
-    bat_sim = BatterySimulatorCpp()
-    bat_sim.run(args, battery_charge, horizon)
-    hashes = bat_sim.hashes  # H, cumulative
-    loads = bat_sim.loads  # Ah
-    usage = bat_sim.usage  # A
-    usage_watts = bat_sim.usage_watts  # W
-    mining_energy_usage = bat_sim.mining_energy_usage  # Wh
     electricity_price = generator.ELECTRICITY_PRICE
     xmr_data = POW_Coin(kraken.coin.XMR)
-    profitability = xmr_data.profitability(kraken.fiat.USD, 1, 1, electricity_price)
-    incomes = hashes * profitability["hash_value"]  # $, cumulative
-    costs = mining_energy_usage * electricity_price / 1000  # [$] = [$/kWh] * [Wh] / 1000 [W/kW]
-    effs = [h * e for h, e in zip(hashes, mining_energy_usage)] if mining_energy_usage is not None else [0] * len(available)  # H/J
+    pool_fee = generator.POOL_FEE / 100
+
+    devices = list(sunrise_lib.config_computers.get('computers'))
+    devices = knapsack.setup_devices(devices)
+    # TODO: fix the following values
+    timeframe = 60
+    power_limit = 400
+    solutions = []
+    for energy in available:
+        solution = knapsack.solver(devices, timeframe, power_limit, energy/1000*timeframe/60)
+        # TODO: use target price instead of fetching current one, if the user picks that option
+        profitability = xmr_data.profitability(kraken.fiat.USD, solution["hashrate"], solution["power"], electricity_price, pool_fee)
+        solution["eff"] = profitability["efficiency"]
+        solution["income"] = profitability["expected_fiat_income_s"] * timeframe * 60  # [$/s * min * 60 s/min]
+        solutions.append(solution)
+    
+    hashes = [s["hashrate"] * timeframe * 60 for s in solutions]  # H
+    usage_watts = [s["power"] for s in solutions]  # W
+    mining_energy_usage = [s["energy"] for s in solutions]  # kWh
+    incomes = [s["income"] for s in solutions]  # $
+    loads = [0] * len(available)  # Ah  # TODO: get rid of this
+    usage = [0] * len(available)  # A  # TODO: get rid of this
+    bat_sim = None  # TODO: get rid of this
+    costs = [x * electricity_price for x in mining_energy_usage]  # [$] = [$/kWh] * [kWh]
+    effs = [s["eff"] for s in solutions]  # H/J
     
     return "Production", hashes, usage, usage_watts, loads, bat_sim, incomes, mining_energy_usage, costs, effs
 
@@ -235,7 +250,7 @@ def plot_hashes():
     plt.subplots_adjust(hspace=0.5)
 
     plt.show()
-        
+
 
 def run_main(args, elev, show_plots, battery_charge, horizon):
     generator.run_algo(args, elev, show_plots, get_usage_prod, battery_charge, horizon)

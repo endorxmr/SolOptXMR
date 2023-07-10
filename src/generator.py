@@ -287,7 +287,7 @@ def get_usage_simple(available, battery_charge, horizon):
             use = use_exp
         else:
             use = 0
-        usage.append(use)            
+        usage.append(use)
         load_i = bat_sim.iter_get_load(available[i], use)
         loads.append(load_i)
 
@@ -295,12 +295,12 @@ def get_usage_simple(available, battery_charge, horizon):
 
 def print_hashes(hashes):
     HASH_UNIT = 1e6
-    # print("Total hashes =", round(np.sum(hashes) / HASH_UNIT, 2), "MH")
-    print("Total hashes =", round(hashes[-1] / HASH_UNIT, 2), "MH")
+    print("Total hashes =", round(np.sum(hashes) / HASH_UNIT, 2), "MH")
+    # print("Total hashes =", round(hashes[-1] / HASH_UNIT, 2), "MH")
 
 def print_profits(incomes, costs):
-    # income = round(np.nansum(incomes), 2)
-    income = incomes[-1]  # Only the last element, because it's cumulative
+    income = round(np.nansum(incomes), 2)
+    # income = incomes[-1]  # Only the last element, because it's cumulative
     cost = np.nansum(costs)
     profit = income - cost
     if profit > 0:
@@ -319,7 +319,7 @@ def print_profits(incomes, costs):
 def get_usage(args, available, algo, battery_charge=0, horizon=0):
     name, hashes, usage, usage_watts, bat, bat_sim, incomes, mining_energy_usage, costs, effs = algo(args, available, battery_charge, horizon)
     print("\nAlgo name: ", name)
-    bat_sim.print_stats(len(available))
+    # bat_sim.print_stats(len(available))
     print_hashes(hashes)
     print_profits(incomes, costs)
     #print(effs)  # Check if efficiency is reasonable
