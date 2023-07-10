@@ -55,6 +55,11 @@ jobs:
 #        path: build/deps/dload
 #        key:          deps-${{ hashFiles('build/deps/dload/*') }}
 #        restore-keys: deps-${{ hashFiles('build/deps/dload/*') }}
+    - name: Cache pip packages
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip' # caching pip dependencies
     - name: prepare environment
       run: util/prep-env.sh
     - name: set apt conf
@@ -112,6 +117,11 @@ jobs:
 #        path: build/deps/dload
 #        key:          deps-${{ hashFiles('build/deps/dload/*') }}
 #        restore-keys: deps-${{ hashFiles('build/deps/dload/*') }}
+    - name: Cache pip packages
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip' # caching pip dependencies
     - name: prepare environment
       run: util/prep-env.sh
     - name: set apt conf
@@ -163,6 +173,11 @@ jobs:
         restore-keys: |
           data-diff-01-${{ github.sha }}
           data-diff-01
+    - name: Cache pip packages
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip' # caching pip dependencies
     - name: prepare environment
       run: util/prep-env.sh
     - name: install dependencies
