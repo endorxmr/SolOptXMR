@@ -55,6 +55,20 @@ jobs:
 #        path: build/deps/dload
 #        key:          deps-${{ hashFiles('build/deps/dload/*') }}
 #        restore-keys: deps-${{ hashFiles('build/deps/dload/*') }}
+    - name: Cache APT Packages
+      # You may pin to the exact commit or the version.
+      # uses: awalsh128/cache-apt-pkgs-action@1850ee53f6e706525805321a3f2f863dcf73c962
+      uses: awalsh128/cache-apt-pkgs-action@v1.3.0
+      with:
+        # Space delimited list of packages to install. Version can be specified optionally using APT command syntax of <name>=<version> (e.g. xdot=1.2-2).
+        packages: gfortran libffi-dev python3-testresources rapidjson-dev lm-sensors fswebcam at
+        version: 1.0
+    - name: Cache pip packages
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip' # caching pip dependencies
+    # - run: pip install -r requirements.txt  # Done by next step
     - name: prepare environment
       run: util/prep-env.sh
     - name: set apt conf
