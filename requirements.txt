@@ -15,6 +15,7 @@ kiwisolver==1.4.4
 krakenex==2.1.0
 matplotlib==3.7.1
 msgpack==1.0.4
+ortools==9.6.2534
 packaging==21.3
 pvlib==0.9.3
 pykrakenapi==0.3.1
