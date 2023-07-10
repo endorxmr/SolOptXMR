@@ -105,7 +105,7 @@ def get_power(start_date, days_horizon=3, unpickle=True):
     mc.run_model(weather)
 
     watt_peak = sunrise_lib.get_arrays()[0]['watt_peak'] # TODO: assuming each panel uses the same Wp
-    watt = mc.results.ac * watt_peak * 0.8 # TODO: damping the result by 20%
+    watt = mc.results.ac * watt_peak * 0.8 # [W] TODO: damping the result by 20%
     #watt.columns = ['Watt']
     #print("Watt")
     #print(watt)

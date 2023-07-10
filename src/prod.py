@@ -279,7 +279,7 @@ def main(args):
     else:
         global MAX_RAW_SUN_INPUT_INFO
         start_date = dateutil.parser.parse(args.start_date)
-        elev = generator.get_power(start_date, args.days_horizon, unpickle=False)
+        elev = generator.get_power(start_date, args.days_horizon, unpickle=False)  # [W]
         #print(pos)
         show_plots = not args.no_plot
         #print('hori', args.days_horizon)
