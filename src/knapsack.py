@@ -146,6 +146,26 @@ def setup_devices(devices:list[dict]) -> dict:
     return devices
 
 
+def test_solver():
+    devices = {'device_indices': [0, 1, 2], 'hashrates': [1000, 8160, 21440], 'powers': [46.0, 73.80000000000001, 216.0]}
+    timeframe = 5  # [min]
+    power = 300  # [W]
+    energy = 0.025  # [kWh]
+    solution = solver(devices, timeframe, power, energy)
+    print(solution)
+    assert solution == {'chosen_indices': [1, 2], 'hashrate': 29600, 'power': 289.8, 'energy': 0.024149999999999998}
+
+
+def test_setup_devices():
+    computers = [
+        {"name": "Fanless Intel, 4 core","hostname": "intel4","MAC": "DE:AD:BE:EF:AA:BB","count": 1,"cores": 4,"hash_per_core": 250,"watt_per_core": 11.5,"watt_idle": 5,"watt_asleep": 1,"min_run_hours": 1,"max_temp_celsius": 51},
+        {"name": "Ryzen 5600X","hostname": "ryzen5600x","MAC": "C0:FF:EE:BA:BE:AA","count": 1,"cores": 12,"hash_per_core": 680,"watt_per_core": 6.15,"watt_idle": 20,"watt_asleep": 1,"min_run_hours": 1,"max_temp_celsius": 45},
+        {"name": "Ryzen 5950X","hostname": "ryzen5950x","MAC": "C0:FF:EE:BA:BE:BB","count": 1,"cores": 32,"hash_per_core": 670,"watt_per_core": 6.75,"watt_idle": 20,"watt_asleep": 1,"min_run_hours": 1,"max_temp_celsius": 45}
+    ]
+    devices = setup_devices(computers)
+    assert devices == {'device_indices': [0, 1, 2], 'hashrates': [1000, 8160, 21440], 'powers': [46.0, 73.80000000000001, 216.0]}
+
+
 if __name__ == '__main__':
     # Read the computers configuration
     computers = list(sunrise_lib.config_computers.get('computers'))
