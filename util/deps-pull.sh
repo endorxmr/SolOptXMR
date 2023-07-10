@@ -24,7 +24,7 @@ else
 	pvlib pykrakenapi pyparsing pyrsistent python-dateutil \
 	python-json-config pytz requests six urllib3 \
 	beautifulsoup4 wget cairosvg Pillow>=9.1.1 geocoder \
-	opencv-python screeninfo \
+	opencv-python screeninfo ortools \
 	# pytesseract not employed yet
 	#pip3 install --upgrade 
 	# Curses menu:
