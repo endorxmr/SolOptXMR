@@ -105,7 +105,7 @@ class POW_Coin:
         for i in range(nodes_num):
             node_url = self.node_urls[self.node_fails % nodes_num]
             try:
-                data = requests.post(f"{node_url}/json_rpc", json=req, timeout=5).json()
+                data = requests.post(f"{node_url}/json_rpc", json=req, timeout=15).json()
             except Exception as e:
                 self.node_fails = (self.node_fails + 1) % nodes_num
                 print(f"Error while trying to request {req['method']} from {node_url}/json_rpc: ", e)
