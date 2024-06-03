@@ -1,44 +1,25 @@
-pandas==2.0.3
-scipy==1.11.1
-numpy==1.25.1
-attrs==22.1.0
-certifi==2022.9.24
-charset-normalizer==2.1.1
-curses-menu==0.6.6
-cycler==0.11.0
-ephem==4.1.3
-fonttools==4.37.3
-h5py==3.7.0
-idna==3.4
-jsonschema==4.16.0
-kiwisolver==1.4.4
-krakenex==2.1.0
-matplotlib==3.7.1
-msgpack==1.0.4
-ortools==9.6.2534
-packaging==21.3
-pvlib==0.9.3
-pykrakenapi==0.3.1
-pyparsing==3.0.9
-pyrsistent==0.18.1
-python-dateutil==2.8.2
-python-json-config==1.2.3
-pytz==2022.2.1
-requests==2.31.0
-six==1.16.0
-urllib3==2.0.3
+geocoder
+krakenex
+matplotlib
+numpy
+ortools
+requests
+pandas
+pvlib
+pykrakenapi
+pytest
+pytest-dependency
+scipy
+texttable
 # Curses menu:
 windows-curses==2.3.1 ; sys_platform == 'win32'
 # Ascii menu:
-asciimatics==1.14.0
+asciimatics
 # Weather:
-beautifulsoup4==4.12.2
-wget==3.2
-CairoSVG==2.5.2
-Pillow==9.2.0
-# Geo location
-geocoder==1.38.1
+beautifulsoup4
+wget
+CairoSVG
+Pillow
 # Image recognition
-opencv-python==4.6.0.66
-screeninfo==0.8.1
-screeninfo>=0.8
+opencv-python
+screeninfo
