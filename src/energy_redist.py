@@ -21,6 +21,26 @@ class EnergyBucket:
         self.limitation = Limitation.NO  # Initial value of power/energy limitation status of the bucket
         self.value = value  # Value of the bucket
 
+class EnergyBucketNew:
+    def __init__(self, index, value):
+        self.index = index  # Index of the bucket
+        # self.interval = interval  # [h] Time interval
+        self.battery_charge = 0.0  # [kWh] Initial energy in the bucket
+        self.available_energy = 0.0  # [kWh] Available energy in the bucket
+        self.filled_energy = 0.0  # [kWh] Filled energy in the bucket
+        self.power_limit = 0.0  # [W] Power limit of the bucket
+        self.value = value  # [$/kWh] Profitability value of the bucket
+
+    # def consume(power):
+    # def consume(energy):
+    # Implement the power/energy consumption, with related error-checking, inside the bucket
+    # Consider moving the input power and other power consumptions in here too, and use this as the individual timeframe?
+    # That way we don't have to bother handling all those numpy arrays by hand and keeping track of their indices
+    # Consider also tracking two battery charge values per timeframe: the initial charge (at the beginning) and the final charge 
+    # (at the end), which represents the initial charge minus the power consumptions.
+    # Issue: every time we recalculate a bucket, we have to recompute the initial and final values for all subsequent buckets as well.
+    # It's more computationally efficient to do a single pass
+
 
 def calculate_battery_charge(interval: float, tf: np.ndarray, battery_params: dict, solar_input: np.ndarray, other_output: np.ndarray, mining_output: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the battery charge levels over the prediction timeframe
@@ -160,6 +180,17 @@ def charge_subrange_split(battery_charge: np.ndarray, battery_params: dict):
     return subranges
 
 
+def calculate_bucket_availability_new(buckets: list[EnergyBucketNew], battery_charge: np.ndarray, available_power: np.ndarray, excess_energy: np.ndarray) -> list[EnergyBucketNew]:
+    for i, bucket in enumerate(buckets):
+        bucket.power_limit = available_power[i]
+        bucket.available_energy = excess_energy[i]
+        if bucket.available_energy < 0:
+            raise ValueError(f"Bucket {i} has negative energy! {bucket.available_energy}")
+        if bucket.power_limit < 0:
+            raise ValueError(f"Bucket {i} has negative power limit! {bucket.power_limit}")
+    return buckets
+
+
 # def calculate_bucket_availability(buckets: list[EnergyBucket], system_params: dict) -> list[EnergyBucket]:
 def calculate_bucket_availability(buckets: list[EnergyBucket], battery_charge: np.ndarray, available_power: np.ndarray, excess_energy: np.ndarray, system_params: dict) -> list[EnergyBucket]:
     for i, bucket in enumerate(buckets):
@@ -195,6 +226,29 @@ def calculate_bucket_availability(buckets: list[EnergyBucket], battery_charge: n
             bucket.limitation = Limitation.ENERGY
     
     return buckets
+
+
+def energy_redistribution_new(
+    system_params: dict,
+    battery_charge: np.ndarray,
+    excess_energy: np.ndarray,
+    above_threshold: np.ndarray,
+    buckets: list[EnergyBucketNew],
+    energies_to_spread: np.ndarray
+    ):
+
+    interval = system_params['interval']
+    mining_power = np.zeros_like(tf, dtype=float)
+
+    # Sort the 'buckets' array by the 'value' property in descending order using a stable sorting algorithm
+    sorted_buckets = sorted(buckets, key=lambda bucket: bucket.value, reverse=True)
+    sorted_buckets_indices = [buck.index for buck in sorted_buckets]
+
+    # Undistributed energy: means it exceeded the buckets' availability
+    undistributed_energy = np.zeros_like(energies_to_spread, dtype=float)
+    num_energies = len(energies_to_spread)
+    for i in range(0, num_energies):
+        pass
 
 
 def energy_redistribution(
