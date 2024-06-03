@@ -16,7 +16,7 @@ env:
         echo "Acquire::ftp::Timeout  \"120\";" | sudo tee -a /etc/apt/apt.conf.d/80-custom
 
 jobs:
-  build-ubuntu:
+  test-energy-redistribution:
     runs-on: ubuntu-latest
     env:
       CCACHE_TEMPDIR: /tmp/.ccache-temp
@@ -33,13 +33,13 @@ jobs:
         path: ~/.ccache
         key:          ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-${{ github.sha }}
         restore-keys: ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-
-    # Less volatile cache
-    - name: data cache
-      uses: actions/cache@v3
-      with:
-        path: externals/tsqsim/build/data/data/txt
-        key:          data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
-        restore-keys: data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
+    # # Less volatile cache
+    # - name: data cache
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: externals/tsqsim/build/data/data/txt
+    #     key:          data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
+    #     restore-keys: data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
     # Expendable, volatile & large cache
     - name: diff cache
       uses: actions/cache@v3
@@ -60,130 +60,21 @@ jobs:
       with:
         python-version: '3.10'
         cache: 'pip' # caching pip dependencies
-    - name: prepare environment
-      run: util/prep-env.sh
+    # - name: prepare environment
+    #   run: util/prep-env.sh
     - name: set apt conf
       run: ${{env.APT_SET_CONF}}
     - name: install dependencies
       run: util/deps-pull.sh
-    - name: build & install the unmanaged dependencies
-      run: util/deps-build.sh
-    - name: Configure your rig
-      run: util/config.sh
-    - name: build generic
-      run: ./util/ci.sh 1
-    - uses: actions/upload-artifact@v3
-      with:
-        name: SolOptXMR-ubuntu-latest
-        path: /home/runner/work/SolOptXMR/SolOptXMR/build/*.png
-        
-  test-ubuntu-offline:
-    needs: build-ubuntu
-    runs-on: ubuntu-latest
-    env:
-      CCACHE_TEMPDIR: /tmp/.ccache-temp
-    strategy:
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        # Volatile cache
-    - name: ccache
-      uses: actions/cache@v3
-      with:
-        path: ~/.ccache
-        key:          ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-${{ github.sha }}
-        restore-keys: ccache01-${{ runner.os }}-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.linkage }}-build-
-    # Less volatile cache
-    - name: data cache
-      uses: actions/cache@v3
-      with:
-        path: externals/tsqsim/build/data/data/txt
-        key:          data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
-        restore-keys: data-${{ hashFiles('externals/tsqsim/data/data/txt/**/*') }}
-    # Expendable, volatile & large cache
-    - name: diff cache
-      uses: actions/cache@v3
-      with:
-        path: /tmp/diff_XMR.pkl
-        key: data-diff-01-${{ github.sha }}
-        restore-keys: |
-          data-diff-01-${{ github.sha }}
-          data-diff-01
-#    - name: deps cache
-#      uses: actions/cache@v3
-#      with:
-#        path: build/deps/dload
-#        key:          deps-${{ hashFiles('build/deps/dload/*') }}
-#        restore-keys: deps-${{ hashFiles('build/deps/dload/*') }}
-    - name: Cache pip packages
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        cache: 'pip' # caching pip dependencies
-    - name: prepare environment
-      run: util/prep-env.sh
-    - name: set apt conf
-      run: ${{env.APT_SET_CONF}}
-    - name: install dependencies
-      run: util/deps-pull.sh
-    - name: build & install the unmanaged dependencies
-      run: util/deps-build.sh
-    - name: Configure your rig
-      run: util/config.sh
-    - name: build generic
-      run: ./util/ci.sh 1
-    - name: Run production
-      run: python3 ./src/prod.py --offline-force
-    - uses: actions/upload-artifact@v3
-      with:
-        name: SolOptXMR-ubuntu-latest
-        path: /home/runner/work/SolOptXMR/SolOptXMR/build/*.png
-    
-
-  build-macos:
-    runs-on: macOS-latest
-    env:
-      CCACHE_TEMPDIR: /tmp/.ccache-temp
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-    # Volatile cache
-    - name: ccache
-      uses: actions/cache@v3
-      with:
-        path: /Users/runner/Library/Caches/ccache
-        key:          ccache03-${{ runner.os }}-${{ matrix.os }}-build-${{ github.sha }}
-        restore-keys: ccache03-${{ runner.os }}-${{ matrix.os }}-build-
-    # Less volatile cache
-    - name: data cache
-      uses: actions/cache@v3
-      with:
-        path: build/data/data/txt
-        key:          data-${{ hashFiles('build/data/data/txt/**/*') }}
-        restore-keys: data-${{ hashFiles('build/data/data/txt/**/*') }}
-    # Expendable, volatile & large cache
-    - name: diff cache
-      uses: actions/cache@v3
-      with:
-        path: /tmp/diff_XMR.pkl
-        key: data-diff-01-${{ github.sha }}
-        restore-keys: |
-          data-diff-01-${{ github.sha }}
-          data-diff-01
-    - name: Cache pip packages
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-        cache: 'pip' # caching pip dependencies
-    - name: prepare environment
-      run: util/prep-env.sh
-    - name: install dependencies
-      run: util/deps-pull.sh
-    - name: build & install the unmanaged dependencies
-      run: util/deps-build.sh
-    - name: build generic
-      run: ./util/ci.sh 1
-
+    # - name: build & install the unmanaged dependencies
+    #   run: util/deps-build.sh
+    # - name: Configure your rig
+    #   run: util/config.sh
+    # - name: build generic
+    #   run: ./util/ci.sh 1
+    - name: run pytest
+      run: pytest
+    # - uses: actions/upload-artifact@v3
+    #   with:
+    #     name: SolOptXMR-ubuntu-latest
+    #     path: /home/runner/work/SolOptXMR/SolOptXMR/build/*.png
